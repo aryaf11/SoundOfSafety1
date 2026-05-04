@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sound of Safety — عرض الفكرة</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #fff;
+      --accent: #0059a3;
+      --safe: #008c3a;
+      --unsafe: #bf0e14;
+      --text: #111;
+      --muted: #5c6470;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000;
+        --card: #1c1c1e;
+        --text: #f2f2f7;
+        --muted: #aeaeb2;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    .screen {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      min-height: 100dvh;
+      display: none;
+      flex-direction: column;
+    }
+    .screen.active { display: flex; }
+    h1 { font-size: 1.35rem; margin: 0 0 0.5rem; }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      margin: 2rem 0 1rem;
+      font-size: 3.5rem;
+    }
+    .logo span { font-size: 2rem; opacity: 0.85; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
+    input[type="url"], input[type="text"] {
+      width: 100%;
+      padding: 14px 14px;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: var(--card);
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      min-height: 52px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 0.25rem;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      margin-top: 0.75rem;
+    }
+    .result-safe { color: var(--safe); font-size: 1.5rem; font-weight: 800; }
+    .result-unsafe { color: var(--unsafe); font-size: 1.5rem; font-weight: 800; }
+    .reasons { margin-top: 0.75rem; padding-right: 0; list-style: none; }
+    .reasons li { margin: 0.35rem 0; padding-right: 1.2rem; position: relative; }
+    .reasons li::before { content: "•"; position: absolute; right: 0; color: var(--muted); }
+    .hint { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
+    .splash-title { text-align: center; font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; }
+    .progress { text-align: center; margin-top: 1.5rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <!-- شاشة البداية (محاكاة ٢ ثانية) -->
+  <div id="splash" class="screen active" aria-live="polite">
+    <div class="logo" aria-hidden="true">🛡️ <span>〰️</span></div>
+    <p class="splash-title">Sound of Safety<br />صوت الأمان</p>
+    <p class="progress">جاري التحميل…</p>
+  </div>
+
+  <!-- الشاشة الرئيسية — فكرة الفحص -->
+  <div id="main" class="screen" aria-labelledby="main-title">
+    <h1 id="main-title">فحص الرابط</h1>
+    <p class="hint">هذا عرض توضيحي في المتصفح فقط — لا يستبدل تطبيق iOS.</p>
+
+    <div class="card" style="margin-top: 1rem;">
+      <label for="url">عنوان الموقع</label>
+      <input id="url" type="url" inputmode="url" placeholder="https://example.com"
+        autocomplete="url" />
+
+      <button type="button" class="btn-primary" id="checkBtn">تحقق من الرابط</button>
+
+      <div id="out" hidden style="margin-top: 1rem;">
+        <p id="statusText" role="status"></p>
+        <p id="confText" style="margin: 0.5rem 0;"></p>
+        <ul id="reasonsList" class="reasons"></ul>
+      </div>
+
+      <button type="button" class="btn-ghost" id="speakBtn">🔊 تشغيل التنبيه الصوتي (عربي)</button>
+      <button type="button" class="btn-ghost" id="replaySplash">عرض الشاشة الافتتاحية مجدداً</button>
+    </div>
+
+    <p class="hint">للاختبار السريع: جرّب <code>evil-phish.example</code> في الحقل أو أي نطاق تشبه فيه «phish» لتظهر نتيجة «غير آمن» (<strong>محاكاة فقط</strong>).</p>
+  </div>
+
+  <script>
+    const SPLASH_MS = 2000;
+    const PHRASE_SAFE = 'الرابط آمن';
+    const PHRASE_UNSAFE = 'تحذير، هذا الرابط غير آمن';
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach((el) => {
+        el.classList.toggle('active', el.id === id);
+      });
+    }
+
+    function speakArabic(text) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ar-SA';
+      const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith('ar'));
+      if (voices.length) u.voice = voices[0];
+      speechSynthesis.speak(u);
+    }
+
+    speechSynthesis.addEventListener('voiceschanged', () => {});
+
+    setTimeout(() => showScreen('main'), SPLASH_MS);
+
+    function mockCheck(raw) {
+      const s = (raw || '').trim().toLowerCase();
+      const suspicious = /phish|malware|login-verify|steal|fake-bank/.test(s);
+      if (suspicious) {
+        return {
+          isSafe: false,
+          confidence: 0.88,
+          reasons: ['النطاق يشبه صفحات تصيّد شائعة (عرض فقط).', 'لا يوجد اتصال حقيقي بخادم في هذه الصفحة.'],
+        };
+      }
+      return {
+        isSafe: true,
+        confidence: 0.91,
+        reasons: ['لم تُلاحظ أنماط مشبوهة في العرض التجريبي.'],
+      };
+    }
+
+    document.getElementById('checkBtn').addEventListener('click', () => {
+      const url = document.getElementById('url').value.trim();
+      const out = document.getElementById('out');
+      const statusText = document.getElementById('statusText');
+      const confText = document.getElementById('confText');
+      const reasonsList = document.getElementById('reasonsList');
+
+      if (!url) {
+        alert('أدخل رابطاً أولاً.');
+        return;
+      }
+
+      const r = mockCheck(url);
+      out.hidden = false;
+      statusText.className = r.isSafe ? 'result-safe' : 'result-unsafe';
+      statusText.textContent = r.isSafe ? 'آمن — SAFE' : 'غير آمن — UNSAFE';
+      confText.textContent = 'الثقة التقريبية: ' + Math.round(r.confidence * 100) + '%';
+      reasonsList.innerHTML = r.reasons.map((x) => '<li>' + escapeHtml(x) + '</li>').join('');
+
+      speakArabic(r.isSafe ? PHRASE_SAFE : PHRASE_UNSAFE);
+    });
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      const url = document.getElementById('url').value.trim();
+      if (!url) {
+        speakArabic('الرجاء إدخال رابط ثم الضغط على تحقق من الرابط.');
+        return;
+      }
+      const r = mockCheck(url);
+      speakArabic(r.isSafe ? PHRASE_SAFE : PHRASE_UNSAFE);
+    });
+
+    document.getElementById('replaySplash').addEventListener('click', () => {
+      showScreen('splash');
+      setTimeout(() => showScreen('main'), SPLASH_MS);
+    });
+
+    function escapeHtml(t) {
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
