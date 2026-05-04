@@ -1,0 +1,30 @@
+Sound of Safety — native iOS (SwiftUI)
+=====================================
+
+Open the Xcode project (macOS + Xcode 15+):
+
+1) Install XcodeGen: https://github.com/yonaskolb/XcodeGen
+   brew install xcodegen
+
+2) From this directory (folder that contains project.yml), run:
+   xcodegen generate
+
+3) Open SoundOfSafety.xcodeproj
+
+4) Signing & Capabilities:
+   - Select the SoundOfSafety app target → Signing → choose your Team.
+   - Enable “App Groups” and add: group.com.soundofsafety.shared
+   - Select the SoundOfSafetyShareExtension target → same Group.
+
+5) API: In Settings inside the app, set your real API base URL (https only recommended)
+   and deploy a backend that exposes POST /check-url returning JSON:
+   {"is_safe":true/false,"confidence":0.95,"reasons":["..."]}
+
+6) App icon: Add your 1024×1024 artwork in Assets.xcassets → AppIcon.
+
+Notes
+-----
+- OTP email verification is simulated locally for development; replace with your email
+  provider or backend before production.
+- Passwords are stored as SHA-256 in the Keychain, not in plaintext.
+- Clipboard checks run when the app becomes active or the pasteboard changes (if enabled).

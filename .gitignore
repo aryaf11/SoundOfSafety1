@@ -1,0 +1,19 @@
+# OS / editors
+.DS_Store
+.idea/
+*.iml
+.atom/
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+
+# Swift / XcodeGen (optional)
+.swiftpm/
+
+# Legacy Flutter/Dart (if any folder reappears)
+.dart_tool/
+.pub/
+/build/
