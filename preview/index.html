@@ -85,15 +85,11 @@
       <p class="subtitle" lang="ar">مرحباً <span id="welcomeName"></span></p>
       <h2 class="screen-heading">فحص الرابط</h2>
 
-      <div id="clipboardBanner" class="clipboard-banner" role="alert" aria-live="polite"></div>
+      <div id="clipboardBanner" class="clipboard-banner" role="alert" aria-live="assertive"></div>
 
       <div class="card">
         <label for="checkUrlInput">أدخل الرابط</label>
         <input id="checkUrlInput" type="url" inputmode="url" autocomplete="url" dir="ltr" placeholder="https://example.com" />
-
-        <p class="hint" style="margin-top: -0.3rem;">
-          <strong>الحافظة:</strong> انسخ رابطاً من أي تبويب ثم عد إلى هذه الصفحة؛ إن سمح المتصفح بالقراءة وكان الفحص على الخادم يصنّفه غير آمناً سيظهر تنبيه وتنبيه صوتي.
-        </p>
 
         <div id="checkLoading" class="loading-row" hidden>
           <span class="spinner" aria-hidden="true"></span>
@@ -103,24 +99,10 @@
 
         <button type="button" class="btn btn-primary" id="btnCheckUrl">تحقق من الرابط</button>
 
-        <div id="checkResultZone" class="reasons-section" hidden>
+        <div id="checkResultZone" hidden>
           <p id="resultBadge" class="result-badge" role="status"></p>
-          <p id="confidenceLine" class="confidence"></p>
-          <p class="reasons-title">الأسباب</p>
-          <ul id="reasonsList" class="reasons"></ul>
-
-          <p class="reasons-title">هل كان التقييم صحيحاً؟</p>
-          <div class="feedback-row">
-            <button type="button" class="btn btn-safe-outline" id="feedbackSafe">يبدو آمناً</button>
-            <button type="button" class="btn btn-unsafe-outline" id="feedbackUnsafe">يبدو غير آمناً</button>
-          </div>
-          <p id="feedbackThanks" class="feedback-done" hidden>شكراً — تم حفظ الملاحظة محلياً في هذا المتصفح.</p>
         </div>
-
-        <button type="button" class="btn btn-secondary" id="btnSpeakAgain">🔊 تشغيل التحذير الصوتي (عربي)</button>
       </div>
-
-      <p class="hint">النتيجة مبنية على طلب شبكة حقيقي من الخادم (رمز الحالة النهائي، HTTPS مقابل HTTP، عدد التحويلات، وقائمة Google إن ضُبط المفتاح).</p>
     </section>
 
     <!-- السجل -->
@@ -143,7 +125,7 @@
 
       <div class="card">
         <div class="toggle-row">
-          <span><strong>مراقبة الحافظة للروابط</strong><br /><span class="hint" style="margin:0;">عند العودة للصفحة قد يُقرأ آخر محتوى نُسِخ (إذا سمح المتصفح).</span></span>
+          <span><strong>مراقبة الحافظة</strong></span>
           <label class="visually-hidden" for="setClipboard">تفعيل مراقبة الحافظة</label>
           <input type="checkbox" class="switch" id="setClipboard" checked />
         </div>

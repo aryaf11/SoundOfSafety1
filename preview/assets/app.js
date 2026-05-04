@@ -2,10 +2,7 @@
  * Sound of Safety — فحص الروابط حقيقياً عبر الخادم (Netlify: POST /api/check-url).
  */
 
-const PHRASE_SAFE = 'الرابط آمن';
 const PHRASE_UNSAFE = 'تحذير، هذا الرابط غير آمن';
-
-let lastSpeakSnapshot = null;
 
 const LS = {
   session() {
@@ -64,6 +61,17 @@ function speakArabic(text) {
   speechSynthesis.speak(u);
 }
 
+function normalizeHrefForNavigate(raw) {
+  let s = (raw || '').trim();
+  if (!s) return null;
+  if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
+  try {
+    return new URL(s).href;
+  } catch {
+    return null;
+  }
+}
+
 function apiBaseEffective() {
   const v = (LS.session().settings.apiBase || '').trim();
   if (v) return v.replace(/\/$/, '');
@@ -92,10 +100,10 @@ function renderHistory() {
     const li = document.createElement('li');
     li.className = 'history-item';
     const badgeClass = item.is_safe ? 'safe' : 'unsafe';
-    const badgeText = item.is_safe ? 'آمن' : 'غير آمن';
+    const badgeText = item.is_safe ? 'آمن' : 'خبيث';
     li.innerHTML =
       `<p class="url-line">${escapeHtml(item.url)}<span class="badge-mini ${badgeClass}">${badgeText}</span></p>` +
-      `<p class="meta">${Math.round(item.confidence * 100)}% ثقة · ${escapeHtml(item.at)}</p>`;
+      `<p class="meta">${escapeHtml(item.at)}</p>`;
     ul.appendChild(li);
   });
 }
@@ -304,7 +312,6 @@ function wireCheck() {
 
     zone.hidden = true;
     errEl.textContent = '';
-    document.getElementById('feedbackThanks').hidden = true;
 
     if (!url) {
       errEl.textContent = 'أدخل رابطاً للتحقق.';
@@ -318,11 +325,10 @@ function wireCheck() {
     let raw;
     try {
       raw = await fetchUrlAssessment(url);
-      lastSpeakSnapshot = { url, is_safe: raw.is_safe };
     } catch (e) {
       errEl.textContent =
         e?.message ||
-        'تعذّر الاتصال بالخادم. على الجهاز المحلي شغّل: netlify dev (من جذر المشروع) ثم افتح الرابط الذي يعطيك Netlify (مثلاً المنفذ 8888). على Netlify تأكد أن الموقع منشور من هذا المستودع.';
+        'تعذّر الاتصال بالخادم. شغّل netlify dev من جذر المشروع أو انشر الموقع على Netlify.';
       loading.hidden = true;
       document.getElementById('btnCheckUrl').disabled = false;
       return;
@@ -332,58 +338,28 @@ function wireCheck() {
     document.getElementById('btnCheckUrl').disabled = false;
 
     const isSafe = raw.is_safe;
-    const badge = document.getElementById('resultBadge');
-    badge.textContent = isSafe ? 'آمن SAFE' : 'غير آمن UNSAFE';
-    badge.className = `result-badge ${isSafe ? 'result-safe' : 'result-unsafe'}`;
-    badge.setAttribute('aria-label', isSafe ? 'نتيجة: آمن' : 'نتيجة: غير آمن');
+    const href = normalizeHrefForNavigate(url);
 
-    document.getElementById('confidenceLine').textContent =
-      `نسبة الثقة: ${Math.round(Number(raw.confidence) * 100)}%`;
-
-    const reasons = Array.isArray(raw.reasons) ? raw.reasons : [];
-    document.getElementById('reasonsList').innerHTML = reasons
-      .map((x) => `<li>${escapeHtml(String(x))}</li>`)
-      .join('');
-
-    zone.hidden = false;
     addHistoryEntry(url, raw);
     renderHistory();
-    speakArabic(isSafe ? PHRASE_SAFE : PHRASE_UNSAFE);
 
-    document.getElementById('feedbackSafe').onclick = () => submitFeedback(url, true);
-    document.getElementById('feedbackUnsafe').onclick = () => submitFeedback(url, false);
-  };
-
-  document.getElementById('btnSpeakAgain').onclick = async () => {
-    const inp = document.getElementById('checkUrlInput').value.trim();
-    if (!inp) {
-      speakArabic('أدخل رابطاً ثم استخدم تحقق من الرابط.');
+    if (isSafe) {
+      if (href) {
+        window.location.assign(href);
+      } else {
+        errEl.textContent = 'عنوان غير صالح للانتقال.';
+      }
       return;
     }
-    if (lastSpeakSnapshot && lastSpeakSnapshot.url === inp) {
-      speakArabic(lastSpeakSnapshot.is_safe ? PHRASE_SAFE : PHRASE_UNSAFE);
-      return;
-    }
-    try {
-      const r = await fetchUrlAssessment(inp);
-      lastSpeakSnapshot = { url: inp, is_safe: r.is_safe };
-      speakArabic(r.is_safe ? PHRASE_SAFE : PHRASE_UNSAFE);
-    } catch {
-      speakArabic('تعذّر جلب النتيجة من الخادم. اضغط تحقق من الرابط أولاً.');
-    }
+
+    const badge = document.getElementById('resultBadge');
+    badge.textContent = 'خبيث';
+    badge.className = 'result-badge result-unsafe';
+    badge.setAttribute('aria-label', 'نتيجة: رابط خبيث');
+    zone.hidden = false;
+    speakArabic(PHRASE_UNSAFE);
   };
 }
-
-function submitFeedback(url, reportedSafe) {
-  const fb = JSON.parse(localStorage.getItem('sos_demo_feedback') || '[]');
-  fb.unshift({ url, reportedSafe, at: new Date().toISOString() });
-  localStorage.setItem('sos_demo_feedback', JSON.stringify(fb.slice(0, 50)));
-  document.getElementById('feedbackThanks').hidden = false;
-  speakArabic(
-    reportedSafe ? 'شكراً، تم تسجيل ملاحظتك كرابط يبدو آمناً.' : 'شكراً، تم تسجيل ملاحظتك.'
-  );
-}
-
 function wireHistory() {
   document.getElementById('btnClearHistory').onclick = () => {
     LS.saveHistory([]);
@@ -446,25 +422,20 @@ function wireSettings() {
   };
 }
 
-function trimDisplay(t) {
-  const m = 72;
-  if (t.length <= m) return t;
-  return `${t.slice(0, m)}…`;
-}
-
 async function showClipboardWarning(text) {
   try {
     const result = await fetchUrlAssessment(text);
     if (!result.is_safe && document.visibilityState === 'visible') {
       speakArabic(PHRASE_UNSAFE);
       const banner = document.getElementById('clipboardBanner');
-      banner.textContent = `تنبيه الحافظة: الرابط قد يكون غير آمناً وفق فحص الخادم — «${trimDisplay(text)}» — ثقة تقريبية ${Math.round(result.confidence * 100)}%.`;
+      banner.textContent = 'تنبيه: رابط غير آمن في الحافظة.';
       banner.classList.add('show');
     }
   } catch {
-    /* تجاهل أخطاء شبكة صامتة للحافظة */
+    /* صامت */
   }
 }
+
 
 async function probeClipboard() {
   const s = LS.session().settings;
