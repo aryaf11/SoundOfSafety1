@@ -20,7 +20,7 @@
 
 - **اختياري (موصى به):** أضف في Netlify → **Site settings → Environment variables** المفتاح **`GOOGLE_SAFE_BROWSING_API_KEY`** لدمج [Google Safe Browsing v4](https://developers.google.com/safe-browsing/reference/rest). بدون المفتاح لا يزال الفحص يعمل مع التحليل المباشر فقط.
 
-محلياً لتجربة الواجهة مع الدالة معاً: من **جذر المستودع** نفّذ `npx netlify dev` (يثبّت المعاينة ويشغّل الدوال عادة على **http://localhost:8888**). فتح الملف مباشرة `file://` لن يجد خادماً.
+محلياً لتجربة الواجهة مع الدالة معاً: من **جذر المستودع** نفّذ `npm run dev` أو `npx netlify dev` — العنوان يظهر في الطرفية (الافتراضي في `netlify.toml` هو **http://localhost:8890**؛ خادم الملفات الثابتة يعمل على منفذ منفصل **7599** لتفادي تعارض المنفذ `3999` القديم). فتح الملف مباشرة `file://` لن يجد خادماً.
 
 ### Netlify
 

@@ -2,5 +2,8 @@
   "name": "sound-of-safety-web",
   "private": true,
   "version": "1.0.0",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev"
+  }
 }

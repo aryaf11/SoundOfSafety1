@@ -18,3 +18,11 @@
   [headers.values]
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# تطوير محلي: لا نستخدم المنفذ الداخلي الافتراضي 3999 لتفادي EADDRINUSE.
+# Netlify يوجّه إلى خادم ثابت خارجي على targetPort.
+[dev]
+  command = "npx --yes serve@14 preview --listen 7599 --no-clipboard"
+  port = 8890
+  targetPort = 7599
+  publish = "preview"
