@@ -89,10 +89,10 @@
 
       <div class="card">
         <label for="checkUrlInput">أدخل الرابط</label>
-        <input id="checkUrlInput" type="url" inputmode="url" autocomplete="url" dir="ltr" placeholder="https://example.com أو جرّب phish-demo.test" />
+        <input id="checkUrlInput" type="url" inputmode="url" autocomplete="url" dir="ltr" placeholder="https://example.com" />
 
         <p class="hint" style="margin-top: -0.3rem;">
-          <strong>محاكاة «مشاركة»:</strong> انسخ رابطاً من أي تبويب ثم عد إلى هذه الصفحة —إن كان تفعيل مراقبة الحافظة مفعّلاً في الإعدادات والمتصفح يسمح بالقراءة— قد يظهر تنبيه إن كان المحاكي يصنّفه غير آمن.
+          <strong>الحافظة:</strong> انسخ رابطاً من أي تبويب ثم عد إلى هذه الصفحة؛ إن سمح المتصفح بالقراءة وكان الفحص على الخادم يصنّفه غير آمناً سيظهر تنبيه وتنبيه صوتي.
         </p>
 
         <div id="checkLoading" class="loading-row" hidden>
@@ -120,7 +120,7 @@
         <button type="button" class="btn btn-secondary" id="btnSpeakAgain">🔊 تشغيل التحذير الصوتي (عربي)</button>
       </div>
 
-      <p class="hint">لاختبار «غير آمن» على المحاكي: أضف في الرابط كلمات مثل <code dir="ltr">phish</code> أو <code dir="ltr">evil-</code>.</p>
+      <p class="hint">النتيجة مبنية على طلب شبكة حقيقي من الخادم (رمز الحالة النهائي، HTTPS مقابل HTTP، عدد التحويلات، وقائمة Google إن ضُبط المفتاح).</p>
     </section>
 
     <!-- السجل -->
@@ -139,6 +139,8 @@
       <h2 class="screen-heading">الإعدادات</h2>
       <p class="subtitle">مطابق لتجربة التطبيق الأصلي (بدون iOS حقيقي).</p>
 
+      <p class="hint">يفحص الخادم الوجهة فعلياً (HTTP + حماية من الهجمات على الخادم). لرفع تشديد الأمان يُضبط مفتاح Google Safe Browsing في لوحة Netlify.</p>
+
       <div class="card">
         <div class="toggle-row">
           <span><strong>مراقبة الحافظة للروابط</strong><br /><span class="hint" style="margin:0;">عند العودة للصفحة قد يُقرأ آخر محتوى نُسِخ (إذا سمح المتصفح).</span></span>
@@ -146,12 +148,13 @@
           <input type="checkbox" class="switch" id="setClipboard" checked />
         </div>
 
-        <label for="setApi">عنوان الخادم (اختياري) — الأساس بدون مسار إضافي، يُستخدم <code dir="ltr">/check-url</code></label>
-        <input id="setApi" type="url" dir="ltr" placeholder="https://api.example.com" />
+        <label for="setApi">تجاوز عنوان الخادم (اختياري)</label>
+        <p id="effectiveApiHint" class="hint" style="margin: 0 0 0.5rem;"></p>
+        <input id="setApi" type="url" dir="ltr" placeholder="اترك فارغاً لاستخدام هذا الموقع + /api" />
         <button type="button" class="btn btn-primary" id="btnSaveApi">حفظ عنوان الخادم</button>
         <p id="apiSaveNote" class="hint"></p>
 
-        <p class="hint">إذا واجهت أخطاء CORS عند وجود خادم حقيقي، أضِف ترويسات CORS على الـ backend أو استخدم وكيلًا على Netlify (للمطورين).</p>
+        <p class="hint">الاستدعاء نفس المصدر لا يحتاج CORS عند استضافة الواجهة والدالة على Netlify معاً.</p>
 
         <button type="button" class="btn btn-danger" id="btnLogout">تسجيل الخروج</button>
       </div>

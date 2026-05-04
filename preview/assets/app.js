@@ -1,10 +1,11 @@
 /**
- * Sound of Safety — static demo mirroring app flows (Netlify-ready).
- * localStorage demo auth + mock /check-url style results; optional real API.
+ * Sound of Safety — فحص الروابط حقيقياً عبر الخادم (Netlify: POST /api/check-url).
  */
 
 const PHRASE_SAFE = 'الرابط آمن';
 const PHRASE_UNSAFE = 'تحذير، هذا الرابط غير آمن';
+
+let lastSpeakSnapshot = null;
 
 const LS = {
   session() {
@@ -63,28 +64,16 @@ function speakArabic(text) {
   speechSynthesis.speak(u);
 }
 
-function mockCheckRemote(urlStr) {
-  const s = (urlStr || '').trim().toLowerCase();
-  const suspicious =
-    /phish|malware|login-verify|fake-bank|steal-wallet|evil-|\.zip(\?|$)/i.test(s);
-  if (suspicious) {
-    return Promise.resolve({
-      is_safe: false,
-      confidence: 0.88,
-      reasons: [
-        'نمط ضمن قائمة تهديدات تجريبية في العرض التوضيحي.',
-        'يُفضّل التحقق عبر المصدر الرسمي قبل إدخال بيانات.',
-      ],
-    });
+function apiBaseEffective() {
+  const v = (LS.session().settings.apiBase || '').trim();
+  if (v) return v.replace(/\/$/, '');
+  try {
+    const o = window.location.origin.replace(/\/$/, '');
+    if (!o || o === 'null' || o.startsWith('file:')) return '';
+    return `${o}/api`;
+  } catch {
+    return '';
   }
-  return Promise.resolve({
-    is_safe: true,
-    confidence: 0.92,
-    reasons: [
-      'لا تطابق تقريبي مع أنماط شائعة في العرض التوضيحي.',
-      'الفحص الحقيقي يتم عبر خادمك في التطبيق الأصلي.',
-    ],
-  });
 }
 
 function renderHistory() {
@@ -127,21 +116,40 @@ const state = { authTab: 'login' };
 let lastClipboard = '';
 
 async function tryLiveApi(baseRaw, url) {
-  const base = baseRaw.trim().replace(/\/$/, '');
+  const base = (baseRaw || '').trim().replace(/\/$/, '');
+  if (!base) throw new Error('لم يُضبَط عنوان الخادم (أو لم تُفتح الصفحة عبر http/https).');
+
   const endpoint = `${base}/check-url`;
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ url }),
   });
-  if (!res.ok) throw new Error('HTTP');
-  const j = await res.json();
-  if (typeof j.is_safe !== 'boolean' || typeof j.confidence !== 'number') throw new Error('shape');
+
+  let j;
+  try {
+    j = JSON.parse(await res.text());
+  } catch {
+    throw new Error(`استجابة غير متوقعة من الخادم (${res.status}).`);
+  }
+
+  if (!res.ok) {
+    const msg = j.message_ar || j.error || JSON.stringify(j);
+    throw new Error(typeof msg === 'string' ? msg : 'فشل الخادم');
+  }
+
+  if (typeof j.is_safe !== 'boolean' || typeof j.confidence !== 'number')
+    throw new Error('استجابة الخادم لا تحتوي الحقول المطلوبة (is_safe, confidence).');
+
   return {
     is_safe: j.is_safe,
     confidence: j.confidence,
     reasons: Array.isArray(j.reasons) ? j.reasons : [],
   };
+}
+
+async function fetchUrlAssessment(urlStr) {
+  return tryLiveApi(apiBaseEffective(), urlStr);
 }
 
 function updateTabCurrent(id) {
@@ -309,12 +317,12 @@ function wireCheck() {
 
     let raw;
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      const settings = LS.session().settings;
-      raw = settings.apiBase ? await tryLiveApi(settings.apiBase, url).catch(() => null) : null;
-      if (!raw) raw = await mockCheckRemote(url);
-    } catch {
-      errEl.textContent = 'تعذّر الفحص. جرّب لاحقاً.';
+      raw = await fetchUrlAssessment(url);
+      lastSpeakSnapshot = { url, is_safe: raw.is_safe };
+    } catch (e) {
+      errEl.textContent =
+        e?.message ||
+        'تعذّر الاتصال بالخادم. على الجهاز المحلي شغّل: netlify dev (من جذر المشروع) ثم افتح الرابط الذي يعطيك Netlify (مثلاً المنفذ 8888). على Netlify تأكد أن الموقع منشور من هذا المستودع.';
       loading.hidden = true;
       document.getElementById('btnCheckUrl').disabled = false;
       return;
@@ -346,13 +354,23 @@ function wireCheck() {
     document.getElementById('feedbackUnsafe').onclick = () => submitFeedback(url, false);
   };
 
-  document.getElementById('btnSpeakAgain').onclick = () => {
+  document.getElementById('btnSpeakAgain').onclick = async () => {
     const inp = document.getElementById('checkUrlInput').value.trim();
     if (!inp) {
       speakArabic('أدخل رابطاً ثم استخدم تحقق من الرابط.');
       return;
     }
-    mockCheckRemote(inp).then((r) => speakArabic(r.is_safe ? PHRASE_SAFE : PHRASE_UNSAFE));
+    if (lastSpeakSnapshot && lastSpeakSnapshot.url === inp) {
+      speakArabic(lastSpeakSnapshot.is_safe ? PHRASE_SAFE : PHRASE_UNSAFE);
+      return;
+    }
+    try {
+      const r = await fetchUrlAssessment(inp);
+      lastSpeakSnapshot = { url: inp, is_safe: r.is_safe };
+      speakArabic(r.is_safe ? PHRASE_SAFE : PHRASE_UNSAFE);
+    } catch {
+      speakArabic('تعذّر جلب النتيجة من الخادم. اضغط تحقق من الرابط أولاً.');
+    }
   };
 }
 
@@ -377,6 +395,13 @@ function loadSettingsUi() {
   const s = LS.session().settings;
   document.getElementById('setApi').value = s.apiBase || '';
   document.getElementById('setClipboard').checked = s.clipboardMonitor !== false;
+  const hint = document.getElementById('effectiveApiHint');
+  if (hint) {
+    const eff = apiBaseEffective();
+    hint.textContent = eff
+      ? `الخادم الفعلي المستخدم الآن: ${eff}/check-url`
+      : 'لم يُستَنتج عنوان خادم تلقائي (افتح الصفحة عبر http/https أو عيّن عنواناً يدوياً).';
+  }
 }
 
 function wireSettings() {
@@ -399,8 +424,10 @@ function wireSettings() {
     s.apiBase = v;
     LS.saveSettings(s);
     msgEl.textContent = v
-      ? 'تم الحفظ. سيتم استدعاء …/check-url عند وجود عنوان (قد تحتاج CORS على الخادم).'
-      : 'تم المسح. يُستخدم محاكي محلي للعرض فقط.';
+      ? 'تم الحفظ. يتم استدعاء {base}/check-url'
+          .replace('{base}', v.replace(/\/$/, ''))
+      : 'تم المسح؛ يُستخدم تلقائياً نفس أصل الموقع + /api (إن وُجد).';
+    loadSettingsUi();
   };
 
   document.getElementById('setClipboard').onchange = () => {
@@ -425,15 +452,18 @@ function trimDisplay(t) {
   return `${t.slice(0, m)}…`;
 }
 
-function showClipboardWarning(text) {
-  mockCheckRemote(text).then((result) => {
+async function showClipboardWarning(text) {
+  try {
+    const result = await fetchUrlAssessment(text);
     if (!result.is_safe && document.visibilityState === 'visible') {
       speakArabic(PHRASE_UNSAFE);
       const banner = document.getElementById('clipboardBanner');
-      banner.textContent = `تنبيه الحافظة (محاكاة): الرابط يبدو غير آمناً — «${trimDisplay(text)}» — ثقة تقريبية ${Math.round(result.confidence * 100)}%.`;
+      banner.textContent = `تنبيه الحافظة: الرابط قد يكون غير آمناً وفق فحص الخادم — «${trimDisplay(text)}» — ثقة تقريبية ${Math.round(result.confidence * 100)}%.`;
       banner.classList.add('show');
     }
-  });
+  } catch {
+    /* تجاهل أخطاء شبكة صامتة للحافظة */
+  }
 }
 
 async function probeClipboard() {
@@ -457,7 +487,7 @@ async function probeClipboard() {
   if (!looksLike || text === lastClipboard) return;
   lastClipboard = text;
   await new Promise((r) => setTimeout(r, 400));
-  showClipboardWarning(text);
+  void showClipboardWarning(text);
 }
 
 function wireClipboard() {

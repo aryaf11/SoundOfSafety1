@@ -1,10 +1,17 @@
-# Netlify: نشر الواجهة التجريبية فقط
-# ربط مستودع GitHub أو سحب المجلد إلى Netlify Deploy
+# Netlify: واجهة preview + دوال حقيقية للفحص
 
 [build]
   publish = "preview"
 
-# موقع وحيد بدون SPA routing — لا حاجة لإعادة توجيه
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/check-url"
+  to = "/.netlify/functions/check-url"
+  status = 200
+  force = true
 
 [[headers]]
   for = "/*"

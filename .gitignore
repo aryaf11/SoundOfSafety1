@@ -17,3 +17,6 @@ DerivedData/
 .dart_tool/
 .pub/
 /build/
+
+# Netlify / Node
+node_modules/
