@@ -2,217 +2,204 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sound of Safety — عرض الفكرة</title>
-  <style>
-    :root {
-      --bg: #f5f7fb;
-      --card: #fff;
-      --accent: #0059a3;
-      --safe: #008c3a;
-      --unsafe: #bf0e14;
-      --text: #111;
-      --muted: #5c6470;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #000;
-        --card: #1c1c1e;
-        --text: #f2f2f7;
-        --muted: #aeaeb2;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      line-height: 1.5;
-    }
-    .screen {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 1.25rem;
-      min-height: 100dvh;
-      display: none;
-      flex-direction: column;
-    }
-    .screen.active { display: flex; }
-    h1 { font-size: 1.35rem; margin: 0 0 0.5rem; }
-    .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.35rem;
-      margin: 2rem 0 1rem;
-      font-size: 3.5rem;
-    }
-    .logo span { font-size: 2rem; opacity: 0.85; }
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 1rem 1.1rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,.06);
-    }
-    label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
-    input[type="url"], input[type="text"] {
-      width: 100%;
-      padding: 14px 14px;
-      font-size: 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: var(--card);
-      color: var(--text);
-      margin-bottom: 1rem;
-    }
-    button {
-      width: 100%;
-      min-height: 52px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 0.25rem;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-    }
-    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-ghost {
-      background: transparent;
-      color: var(--accent);
-      margin-top: 0.75rem;
-    }
-    .result-safe { color: var(--safe); font-size: 1.5rem; font-weight: 800; }
-    .result-unsafe { color: var(--unsafe); font-size: 1.5rem; font-weight: 800; }
-    .reasons { margin-top: 0.75rem; padding-right: 0; list-style: none; }
-    .reasons li { margin: 0.35rem 0; padding-right: 1.2rem; position: relative; }
-    .reasons li::before { content: "•"; position: absolute; right: 0; color: var(--muted); }
-    .hint { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
-    .splash-title { text-align: center; font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; }
-    .progress { text-align: center; margin-top: 1.5rem; color: var(--muted); }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Sound of Safety — عرض تجريبي لفكرة التطبيق: فحص الروابط وتنبيه صوتي بالعربية" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Sound of Safety — تجربة</title>
+  <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
-  <!-- شاشة البداية (محاكاة ٢ ثانية) -->
-  <div id="splash" class="screen active" aria-live="polite">
-    <div class="logo" aria-hidden="true">🛡️ <span>〰️</span></div>
-    <p class="splash-title">Sound of Safety<br />صوت الأمان</p>
-    <p class="progress">جاري التحميل…</p>
-  </div>
+  <a href="#auth" class="skip-link visually-hidden-focusable">تخطي إلى المحتوى</a>
 
-  <!-- الشاشة الرئيسية — فكرة الفحص -->
-  <div id="main" class="screen" aria-labelledby="main-title">
-    <h1 id="main-title">فحص الرابط</h1>
-    <p class="hint">هذا عرض توضيحي في المتصفح فقط — لا يستبدل تطبيق iOS.</p>
+  <div class="app-shell">
+    <!-- شاشة البداية ~٢ ثانية -->
+    <section id="splash" class="screen active" aria-labelledby="splashTitle">
+      <div class="logo-mark" aria-hidden="true">🛡️ <span class="waves">〰️</span></div>
+      <h1 class="app-title" id="splashTitle">Sound of Safety<br /><span lang="ar">صوت الأمان</span></h1>
+      <p class="progress-line">جاري التحميل…</p>
+    </section>
 
-    <div class="card" style="margin-top: 1rem;">
-      <label for="url">عنوان الموقع</label>
-      <input id="url" type="url" inputmode="url" placeholder="https://example.com"
-        autocomplete="url" />
+    <!-- المصادقة -->
+    <section id="auth" class="screen" aria-hidden="true">
+      <h1 class="screen-heading">المصادقة</h1>
+      <p class="subtitle">عرض تجريبي — لا يوجد اتصال بخادم حقيقي لإرسال الرسائل.</p>
 
-      <button type="button" class="btn-primary" id="checkBtn">تحقق من الرابط</button>
-
-      <div id="out" hidden style="margin-top: 1rem;">
-        <p id="statusText" role="status"></p>
-        <p id="confText" style="margin: 0.5rem 0;"></p>
-        <ul id="reasonsList" class="reasons"></ul>
+      <div class="auth-tabs" role="tablist">
+        <button id="tabLogin" type="button" role="tab" aria-selected="true">تسجيل الدخول</button>
+        <button id="tabRegister" type="button" role="tab" aria-selected="false">حساب جديد</button>
       </div>
 
-      <button type="button" class="btn-ghost" id="speakBtn">🔊 تشغيل التنبيه الصوتي (عربي)</button>
-      <button type="button" class="btn-ghost" id="replaySplash">عرض الشاشة الافتتاحية مجدداً</button>
-    </div>
+      <div class="card" id="authLoginPane">
+        <div class="field-group">
+          <label for="loginEmail">البريد الإلكتروني</label>
+          <input id="loginEmail" type="email" autocomplete="username" dir="ltr" placeholder="you@example.com" />
+        </div>
+        <div class="field-group">
+          <label for="loginPassword">كلمة المرور</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" />
+        </div>
+        <p id="loginError" class="error-text" role="alert"></p>
+        <button type="button" class="btn btn-primary" id="btnLoginSubmit">دخول</button>
+      </div>
 
-    <p class="hint">للاختبار السريع: جرّب <code>evil-phish.example</code> في الحقل أو أي نطاق تشبه فيه «phish» لتظهر نتيجة «غير آمن» (<strong>محاكاة فقط</strong>).</p>
+      <div class="card" id="authRegisterPane" hidden>
+        <div class="field-group">
+          <label for="regUsername">اسم المستخدم</label>
+          <input id="regUsername" type="text" autocomplete="nickname" />
+        </div>
+        <div class="field-group">
+          <label for="regEmail">البريد الإلكتروني</label>
+          <input id="regEmail" type="email" autocomplete="email" dir="ltr" />
+        </div>
+        <div class="field-group">
+          <label for="regPassword">كلمة المرور</label>
+          <input id="regPassword" type="password" autocomplete="new-password" />
+        </div>
+        <div class="field-group">
+          <label for="regPassword2">تأكيد كلمة المرور</label>
+          <input id="regPassword2" type="password" autocomplete="new-password" />
+        </div>
+        <p id="regError" class="error-text" role="alert"></p>
+        <button type="button" class="btn btn-primary" id="btnRegisterContinue">متابعة — تأكيد البريد (رمز OTP)</button>
+      </div>
+    </section>
+
+    <!-- OTP -->
+    <section id="otp" class="screen" aria-hidden="true">
+      <h1 class="screen-heading">تأكيد البريد</h1>
+      <p class="subtitle">رمز من ٦ أرقام لهذا البريد: <strong id="otpEmail" dir="ltr"></strong></p>
+
+      <div class="otp-banner" id="otpHint" role="status"></div>
+
+      <div class="card">
+        <label for="otpInput">رمز التحقق</label>
+        <input id="otpInput" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+        <p id="otpError" class="error-text" role="alert"></p>
+        <button type="button" class="btn btn-primary" id="btnOtpVerify">تأكيد</button>
+        <button type="button" class="btn btn-secondary" id="btnOtpBack">رجوع</button>
+      </div>
+    </section>
+
+    <!-- فحص الرابط -->
+    <section id="main-check" class="screen" aria-hidden="true">
+      <p class="subtitle" lang="ar">مرحباً <span id="welcomeName"></span></p>
+      <h2 class="screen-heading">فحص الرابط</h2>
+
+      <div id="clipboardBanner" class="clipboard-banner" role="alert" aria-live="polite"></div>
+
+      <div class="card">
+        <label for="checkUrlInput">أدخل الرابط</label>
+        <input id="checkUrlInput" type="url" inputmode="url" autocomplete="url" dir="ltr" placeholder="https://example.com أو جرّب phish-demo.test" />
+
+        <p class="hint" style="margin-top: -0.3rem;">
+          <strong>محاكاة «مشاركة»:</strong> انسخ رابطاً من أي تبويب ثم عد إلى هذه الصفحة —إن كان تفعيل مراقبة الحافظة مفعّلاً في الإعدادات والمتصفح يسمح بالقراءة— قد يظهر تنبيه إن كان المحاكي يصنّفه غير آمن.
+        </p>
+
+        <div id="checkLoading" class="loading-row" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          جاري الفحص…
+        </div>
+        <p id="checkError" class="error-text" role="alert"></p>
+
+        <button type="button" class="btn btn-primary" id="btnCheckUrl">تحقق من الرابط</button>
+
+        <div id="checkResultZone" class="reasons-section" hidden>
+          <p id="resultBadge" class="result-badge" role="status"></p>
+          <p id="confidenceLine" class="confidence"></p>
+          <p class="reasons-title">الأسباب</p>
+          <ul id="reasonsList" class="reasons"></ul>
+
+          <p class="reasons-title">هل كان التقييم صحيحاً؟</p>
+          <div class="feedback-row">
+            <button type="button" class="btn btn-safe-outline" id="feedbackSafe">يبدو آمناً</button>
+            <button type="button" class="btn btn-unsafe-outline" id="feedbackUnsafe">يبدو غير آمناً</button>
+          </div>
+          <p id="feedbackThanks" class="feedback-done" hidden>شكراً — تم حفظ الملاحظة محلياً في هذا المتصفح.</p>
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="btnSpeakAgain">🔊 تشغيل التحذير الصوتي (عربي)</button>
+      </div>
+
+      <p class="hint">لاختبار «غير آمن» على المحاكي: أضف في الرابط كلمات مثل <code dir="ltr">phish</code> أو <code dir="ltr">evil-</code>.</p>
+    </section>
+
+    <!-- السجل -->
+    <section id="main-history" class="screen" aria-hidden="true">
+      <div class="screen-header-actions">
+        <h2 class="screen-heading" style="margin:0">السجل</h2>
+        <button type="button" class="btn-text" id="btnClearHistory">مسح الكل</button>
+      </div>
+      <p class="subtitle">روابط تم فحصها في هذا المتصفح (عرض تجريبي).</p>
+      <ul id="historyList" class="history-list"></ul>
+      <div id="historyEmpty" class="empty-state" hidden>لا يوجد شيء بعد. استخدم «فحص الرابط».</div>
+    </section>
+
+    <!-- الإعدادات -->
+    <section id="main-settings" class="screen" aria-hidden="true">
+      <h2 class="screen-heading">الإعدادات</h2>
+      <p class="subtitle">مطابق لتجربة التطبيق الأصلي (بدون iOS حقيقي).</p>
+
+      <div class="card">
+        <div class="toggle-row">
+          <span><strong>مراقبة الحافظة للروابط</strong><br /><span class="hint" style="margin:0;">عند العودة للصفحة قد يُقرأ آخر محتوى نُسِخ (إذا سمح المتصفح).</span></span>
+          <label class="visually-hidden" for="setClipboard">تفعيل مراقبة الحافظة</label>
+          <input type="checkbox" class="switch" id="setClipboard" checked />
+        </div>
+
+        <label for="setApi">عنوان الخادم (اختياري) — الأساس بدون مسار إضافي، يُستخدم <code dir="ltr">/check-url</code></label>
+        <input id="setApi" type="url" dir="ltr" placeholder="https://api.example.com" />
+        <button type="button" class="btn btn-primary" id="btnSaveApi">حفظ عنوان الخادم</button>
+        <p id="apiSaveNote" class="hint"></p>
+
+        <p class="hint">إذا واجهت أخطاء CORS عند وجود خادم حقيقي، أضِف ترويسات CORS على الـ backend أو استخدم وكيلًا على Netlify (للمطورين).</p>
+
+        <button type="button" class="btn btn-danger" id="btnLogout">تسجيل الخروج</button>
+      </div>
+    </section>
+
+    <nav id="tabBar" class="tab-bar" hidden aria-label="التنقل الرئيسي">
+      <button id="tab-check" type="button" aria-current="page"><span class="icon" aria-hidden="true">🛡️</span>فحص</button>
+      <button id="tab-history" type="button"><span class="icon" aria-hidden="true">🕒</span>السجل</button>
+      <button id="tab-settings" type="button"><span class="icon" aria-hidden="true">⚙️</span>إعدادات</button>
+    </nav>
+
+    <footer class="demo-footer">
+      عرض تجريبي لـ <strong lang="en">Sound of Safety</strong> — للعميل فقط لفهم الفكرة. التطبيق الكامل على iOS عبر Xcode.
+      <br />
+      Deploy on Netlify: اربط هذا المجلد أو المستودع مع مجلد النشر <code dir="ltr">preview</code>.
+    </footer>
   </div>
 
-  <script>
-    const SPLASH_MS = 2000;
-    const PHRASE_SAFE = 'الرابط آمن';
-    const PHRASE_UNSAFE = 'تحذير، هذا الرابط غير آمن';
-
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach((el) => {
-        el.classList.toggle('active', el.id === id);
-      });
+  <style>
+    .skip-link.visually-hidden-focusable {
+      position: absolute;
+      left: -9999px;
+      z-index: 999;
+      padding: 0.75rem 1rem;
+      background: var(--accent, #0059a3);
+      color: #fff;
     }
-
-    function speakArabic(text) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ar-SA';
-      const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith('ar'));
-      if (voices.length) u.voice = voices[0];
-      speechSynthesis.speak(u);
+    .skip-link.visually-hidden-focusable:focus {
+      left: 1rem;
+      top: 1rem;
     }
-
-    speechSynthesis.addEventListener('voiceschanged', () => {});
-
-    setTimeout(() => showScreen('main'), SPLASH_MS);
-
-    function mockCheck(raw) {
-      const s = (raw || '').trim().toLowerCase();
-      const suspicious = /phish|malware|login-verify|steal|fake-bank/.test(s);
-      if (suspicious) {
-        return {
-          isSafe: false,
-          confidence: 0.88,
-          reasons: ['النطاق يشبه صفحات تصيّد شائعة (عرض فقط).', 'لا يوجد اتصال حقيقي بخادم في هذه الصفحة.'],
-        };
-      }
-      return {
-        isSafe: true,
-        confidence: 0.91,
-        reasons: ['لم تُلاحظ أنماط مشبوهة في العرض التجريبي.'],
-      };
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
     }
-
-    document.getElementById('checkBtn').addEventListener('click', () => {
-      const url = document.getElementById('url').value.trim();
-      const out = document.getElementById('out');
-      const statusText = document.getElementById('statusText');
-      const confText = document.getElementById('confText');
-      const reasonsList = document.getElementById('reasonsList');
-
-      if (!url) {
-        alert('أدخل رابطاً أولاً.');
-        return;
-      }
-
-      const r = mockCheck(url);
-      out.hidden = false;
-      statusText.className = r.isSafe ? 'result-safe' : 'result-unsafe';
-      statusText.textContent = r.isSafe ? 'آمن — SAFE' : 'غير آمن — UNSAFE';
-      confText.textContent = 'الثقة التقريبية: ' + Math.round(r.confidence * 100) + '%';
-      reasonsList.innerHTML = r.reasons.map((x) => '<li>' + escapeHtml(x) + '</li>').join('');
-
-      speakArabic(r.isSafe ? PHRASE_SAFE : PHRASE_UNSAFE);
-    });
-
-    document.getElementById('speakBtn').addEventListener('click', () => {
-      const url = document.getElementById('url').value.trim();
-      if (!url) {
-        speakArabic('الرجاء إدخال رابط ثم الضغط على تحقق من الرابط.');
-        return;
-      }
-      const r = mockCheck(url);
-      speakArabic(r.isSafe ? PHRASE_SAFE : PHRASE_UNSAFE);
-    });
-
-    document.getElementById('replaySplash').addEventListener('click', () => {
-      showScreen('splash');
-      setTimeout(() => showScreen('main'), SPLASH_MS);
-    });
-
-    function escapeHtml(t) {
-      const d = document.createElement('div');
-      d.textContent = t;
-      return d.innerHTML;
+    code {
+      font-size: 0.85em;
+      background: rgba(0,89,163,0.08);
+      padding: 0.1em 0.35em;
+      border-radius: 6px;
     }
-  </script>
+  </style>
+  <script src="./assets/app.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+# Netlify: نشر الواجهة التجريبية فقط
+# ربط مستودع GitHub أو سحب المجلد إلى Netlify Deploy
+
+[build]
+  publish = "preview"
+
+# موقع وحيد بدون SPA routing — لا حاجة لإعادة توجيه
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
